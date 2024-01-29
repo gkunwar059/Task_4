@@ -7,18 +7,53 @@
 # Use interactive user interface to interact in cli application.
 
 #  Use csv files to read and write student's data.
+# ANSI escape codes for text colors
+import os
+
+# Function to clear the console screen
+def clear_screen():
+    os.system('cls' if os.name == 'nt' else 'clear')
+
+
+class TextColors:
+    RED = '\033[91m'
+    GREEN = '\033[92m'
+    YELLOW = '\033[93m'
+    BLUE = '\033[94m'
+    MAGENTA = '\033[95m'
+    CYAN = '\033[96m'
+    RESET = '\033[0m'  # Reset to default color
+
+# ASCII art for your CLI application
+ascii_art = """
+                                                !!!  WELCOME TO CLI APPLICATION  !!!
+"""
+
+# Print ASCII art in a specific color
+clear_screen()
+# print(TextColors.BLUE + ascii_art + TextColors.RESET)
+
+print(TextColors.BLUE + ascii_art + TextColors.RESET)
+
+# Rest of your CLI application code
+# ...
 
 import csv
+
+
 class Student:  
     # pass
-    def __init__(self,sName,academy):
+    def __init__(self,first_name,last_name,academy):
         self.id=1
-        self.student_name=sName
+        self.firstname=first_name
+        self.lastname=last_name
+
         self.academy=academy
 
         student_data={
         "id":self.id,
-        "student_name": self.student_name,
+        "first_name": self.firstname,
+        "last_name":self.lastname,
         "academy":self.academy.id,
         "fee_paid":0,
         "is_dropout":False
@@ -40,26 +75,27 @@ class Student:
         with open("student.csv",'r') as file:
             reader=csv.reader(file)
             for row in reader:
-                if self.student_name==row[1] and self.academy.id==row[2]:
+                if self.firstname==row[1] and self.lastname==row[2] and self.academy.id==row[3]:
                     selected_student={
                         "id":row[0],
-                        "student_name":row[1],
-                        "academy":row[2],
-                        "fee_paid":row[3],
+                        "first_name":row[1],
+                        "last_name":row[2],
+                        "academy":row[3],
+                        "fee_paid":row[4],
                         "is_dropout":True
                     }
 
 
 # If found, updates the student's status to dropout and writes it back to the file.
         with open("student.csv","a") as file:
-            fieldnames=["id","student_name","academy","fee_paid","is_dropout"]
+            fieldnames=["id","first_name","last_name","academy","fee_paid","is_dropout"]
             writer=csv.DictWriter(file,fieldnames=fieldnames)
 
             if selected_student is not None:
                 if file.tell()==0:
                     writer.writeheader()
                 writer.writerow(selected_student)
-                print("You are opt out !")
+                print(TextColors.RED +"\n You are opt out ! "+TextColors.RESET )
             
 
 
@@ -73,17 +109,18 @@ class Student:
         with open("student.csv",'r') as file:
             reader=csv.reader(file)
             for row in reader:
-                if self.student_name == row[1] and self.academy.id == row[2]:
+                if self.firstname == row[1] and self.lastname==row[2] and self.academy.id == row[3]:
                     updated_row = {
                         "id": row[0],
-                        "student_name": row[1],
-                        "academy": row[2],
+                        "first_name": row[1],
+                        "last_name":row[2],
+                        "academy": row[3],
                         # update the paid_fee with the updated fee
                         "fee_paid": fee,
-                        "is_dropout":row[4]
+                        "is_dropout":row[5]
                     }
         with open('student.csv', 'a', newline='') as csvfile:
-            fieldnames = ["id", "student_name", "academy", "fee_paid","is_dropout"]
+            fieldnames = ["id", "first_name","last_name", "academy", "fee_paid","is_dropout"]
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
 
@@ -93,12 +130,17 @@ class Student:
                     writer.writeheader()
 
                 writer.writerow(updated_row)
-                print("Fee has been paid")
+                print(TextColors.GREEN +"\n Fee has been paid"+TextColors.RESET )
                 
 # check if the fee paid is less then total fee then show the pompt student to pay the remaining installment
                 if fee  < int(self.academy.fee):
-                    print("Pay second remaining due another installment") 
-                             
+                    print("\n Pay second remaining due another installment")  
+                    
+                else:
+                    print("\n You send more money ! Inform office to refund")
+            # else:
+            #     print("YOu God refund money !")
+                                        
         
 class Academy:
     def __init__(self,id,name,academy_fee,course):
@@ -110,10 +152,10 @@ class Academy:
 
         # method start_session to begain a new session,checking if the student has paid the full fee
     def start_session(self,student,is_next=False):
-        print("Starting new session ")
+        print("\n Starting new session ")
 # print academic and course information 
-        print(f"Academy Name: {self.name}")    
-        print(f"Course Name: {self.course}")
+        print(TextColors.YELLOW+f" \n Academy Name: {self.name}"+TextColors.RESET )   
+        print(TextColors.YELLOW+f"\n Course Name: {self.course}"+TextColors.RESET)
 
 # is_next flag is True if the installement of the fee is done otherwise prompt above remaining file
         if is_next :
@@ -122,22 +164,20 @@ class Academy:
             with open('student.csv' ,'r',newline="") as file:
                 reader=csv.reader(file)
                 for row in reader:
-                    if row[1]==student.student_name and row[2]==self.id:
-                        feepaid=row[3]
+                    if row[1]==student.firstname and row[2]==student.lastname and row[3]==self.id:
+                        feepaid=row[4]
         
-            if feepaid < self.fee:
-                print("Please pay remaining installment fee")
-
-            elif feepaid>self.fee:
-                exit()
+            if feepaid <self.fee:
+                print(TextColors.RED +"\n Please pay remaining installment fee"+TextColors.RESET )
+  
                 
 
 
 
 if __name__=="__main__":
 
-    name=input("Enter your Name: ")
-    print("Please select the academy you want to join !")
+    name=input(TextColors.GREEN +" \n  Enter your Name: "+TextColors.RESET )
+    print(TextColors.BLUE+"\n  Please select the academy you want to join !"+TextColors.RESET)
     # academy.csv: Used to store data related to academies. The columns include id, name, fee, and course.
     # Accepts the student's name and displays a list of academies to choose from (academy.csv).
     # 
@@ -147,7 +187,7 @@ if __name__=="__main__":
         for row in reader:
             print(row[0],row[1])
 
-        choice=int(input("Enter the number to join the academy  :"))
+        choice=int(input(TextColors.YELLOW+"\n  Enter the number to join the academy  :"+TextColors.RESET))
         academy=None
         
         with open ("academy.csv" , 'r') as file:
@@ -157,14 +197,15 @@ if __name__=="__main__":
                 if int(row[0])==choice:
 
                     academy=Academy(row[0],row[1],row[2],row[3])
-        student=Student(name,academy)
+        first_name,last_name=name.split(' ')            
+        student=Student(first_name,last_name,academy)
 
-        print(f"Total enrollment Fee: {academy.fee}")
-        print("How much do you want pay now ?")
-        fee=int(input('Enter the amount:'))
+        print(f"\n Total enrollment Fee: {academy.fee}")
+        print("\n How much do you want pay now ?")
+        fee=int(input(TextColors.YELLOW +'\n Enter the amount:'+TextColors.RESET))
         
         student.pay_fee(fee)
-        choice=int(input("Do you want to start next session(1) or opt out(2)?  "))
+        choice=int(input(TextColors.BLUE+"\n  Do you want to start next session(1) or opt out(2)?" + TextColors.RESET))
         # If opting out, calls the opt_out method.
         if choice ==2:
             student.opt_out()
