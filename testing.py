@@ -9,7 +9,7 @@
 #  Use csv files to read and write student's data.
 
 import csv
-class Student:
+class Student:  
     # pass
     def __init__(self,sName,academy):
         self.id=1,
@@ -21,10 +21,7 @@ class Student:
         "student_name": self.student_name,
         "academy":self.academy.id,
         "fee_paid":0
-
-
         }
-
 
         with open ("student.csv",'w',newline="") as file:
             writer=csv.writer(file)
@@ -32,63 +29,78 @@ class Student:
 
             writer.writerow(student_data.values())
 
- 
     
+    def opt_out(self):
 
-    def opt_out():
-        print("I am out !! ")
-        # add dropout flag on student row
+        # this action required 
 
         studentdata=[]
         with open("opt.csv",'w',newline="") as file:
             writer=csv.writer(file)
             writer.writerows(studentdata)
 
+    def pay_fee(self,fee):
+        student_data=None
+        import csv
 
-    def get_feepayment(self,fee):
-        #save user fee in the database 
-        list_of_data=[]
-        with open("studentdata.csv",'w') as file:
-            writer=csv.writer(file)
-            for item in list_of_data:
-                writer.writerows([item])
+        updated_row= None
+        with open("student.csv",'r') as file:
+            reader=csv.reader(file)
+            for row in reader:
+                if self.student_name == row[1] and self.academy.id == row[2]:
+                    updated_row = {
+                        "id": row[0],
+                        "student_name": row[1],
+                        "academy": row[2],
+                        "fee_paid": fee
+                    }
+        with open('student.csv', 'a', newline='') as csvfile:
+            fieldnames = ["id", "student_name", "academy", "fee_paid"]
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            if updated_row is not None:
 
+                writer.writeheader()
+
+                writer.writerow(updated_row)
+                print("Fee has been paid")
+                
+
+                if fee  < int(self.academy.fee):
+                    print("Pay second remaining due another installment")                   
         
-        if fee  < self.academy.fee:
-            print("Pay second remaining due another installment")
-
-
-            
-         
-        
-
 class Academy:
-    def __init__(self,name,academy_fee,course):
-        self.id=1
+    def __init__(self,id,name,academy_fee,course):
+        self.id=id
         self.name=name
         self.fee=academy_fee
         self.course=course
 
 
     # academy file 
-        data={
-            "id":self.id,
-            "name":self.name,
-            "fee":self.fee,
-            "course":self.course,
+        # data={
+        #     "id":self.id,
+        #     "name":self.name,
+        #     "fee":self.fee,
+        #     "course":self.course,
 
-        }
-        # fieldnames=['Name','fee','course']
-        with open ("academy.csv",'w',newline="") as file:
-            writer=csv.writer(file)
-            writer.writerow(data.keys())
+        # }
+        # # fieldnames=['Name','fee','course']
+        # with open ("academy.csv",'w',newline="") as file:
+        #     writer=csv.writer(file)
+        #     writer.writerow(data.keys())
 
-            writer.writerow(data.values())
+        #     writer.writerow(data.values())
 
         
     def start_session(self,student,is_next=False):
+        print("Starting new session ")
+
+        print(f"Academy Name: {self.name}")    
+        print(f"Course Name: {self.course}")
+
         if is_next :
-#             # TODO: check if second installement is pending , if pending show the prompt
+            feepaid=0
+#             #check if second installement is pending , if pending show the prompt
             with open('student.csv' ,'r',newline="") as file:
                 reader=csv.reader(file)
                 for row in reader:
@@ -96,7 +108,7 @@ class Academy:
                         feepaid=row[3]
         
             if feepaid < self.fee:
-                print("You should pay second installment in the next session ")
+                print("please pay remaining installment fee")
                 
 
 
@@ -127,20 +139,41 @@ class Academy:
         
 
 
-academy=Academy("Dima Academy",4000,"Officer Cadet")
-print(vars(academy))
+# academy=Academy("Dima Academy",4000,"Officer Cadet")
 
-student=Student("Rmaesh",academy)
-print(vars(student))
+# student=Student("Rmaesh",academy)
 
+# student.pay_fee(1000)
 
+if __name__=="__main__":
 
+    name=input("Enter your Name: ")
+    print("Please select the academy you want to join !")
+    
+    with open ("academy.csv" , 'r') as file:
+        reader=csv.reader(file)
+        next(reader)
+        for row in reader:
+            print(row[0],row[1])
 
-# obj3=Session("first session")
-# print(vars(obj3))
+        choice=int(input())
+        academy=None
+        with open ("academy.csv" , 'r') as file:
+            reader=csv.reader(file)
+            next(reader)
+            for row in reader:
+                if int(row[0])==choice:
 
-# print(obj.get_enrollement())
-# print(obj.get_feepayment())
+                    academy=Academy(row[0],row[1],row[2],row[3])
+        student=Student(name,academy)
+
+        print(f"Total fee is {academy.fee}")
+        print("How much do youj want pay now ?")
+        fee=int(input())
+        
+        student.pay_fee(fee)
+        
+
 
 
 

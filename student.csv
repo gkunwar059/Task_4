@@ -1,2 +1,4 @@
 id,student_name,academy,fee_paid
-"(1,)",Rmaesh,1,0
+"(1,)",Ganesh,2,0
+id,student_name,academy,fee_paid
+"(1,)",Ganesh,2,5400
