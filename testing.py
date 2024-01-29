@@ -20,7 +20,8 @@ class Student:
         "id":self.id,
         "student_name": self.student_name,
         "academy":self.academy.id,
-        "fee_paid":0
+        "fee_paid":0,
+        "is_dropout":False
         }
 
         with open ("student.csv",'w',newline="") as file:
@@ -34,10 +35,35 @@ class Student:
 
         # this action required 
 
-        studentdata=[]
-        with open("opt.csv",'w',newline="") as file:
-            writer=csv.writer(file)
-            writer.writerows(studentdata)
+        # studentdata=[]
+        # with open("opt.csv",'w',newline="") as file:
+        #     writer=csv.writer(file)
+        #     writer.writerows(studentdata)
+        selected_student=None
+        with open("student.csv",'r') as file:
+            reader=csv.reader(file)
+            for row in reader:
+                if self.student_name==row[1] and self.academy.id==row[2]:
+                    selected_student={
+                        "id":row[0],
+                        "student_name":row[1],
+                        "academy":row[2],
+                        "fee_paid":row[3],
+                        "is_dropout":True
+                    }
+
+        with open("student.csv","a") as file:
+            fieldnames=["id","student_name","academy","fee_paid","is_dropout"]
+            writer=csv.DictWriter(file,fieldnames=fieldnames)
+
+            if selected_student is not None:
+                writer.writeheader
+                writer.writerow(selected_student)
+                print("You are opt out !")
+            
+
+
+
 
     def pay_fee(self,fee):
         student_data=None
@@ -52,10 +78,11 @@ class Student:
                         "id": row[0],
                         "student_name": row[1],
                         "academy": row[2],
-                        "fee_paid": fee
+                        "fee_paid": fee,
+                        "is_dropout":row[4]
                     }
         with open('student.csv', 'a', newline='') as csvfile:
-            fieldnames = ["id", "student_name", "academy", "fee_paid"]
+            fieldnames = ["id", "student_name", "academy", "fee_paid","is_dropout"]
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             if updated_row is not None:
 
@@ -172,6 +199,14 @@ if __name__=="__main__":
         fee=int(input())
         
         student.pay_fee(fee)
+        choice=int(input("Do you want to start next session(1) or opt out(2)?"))
+        if choice ==2:
+            student.opt_out()
+        elif choice==1:
+            academy.start_session(student,is_next=True)
+        
+        
+
         
 
 
