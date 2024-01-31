@@ -32,7 +32,7 @@ class Student:
             # sniffwr =
             writer.writerow(student_data.keys())    
             writer.writerow(student_data.values())
-    @classmethod
+
     def update_student_data(cls, student_data):
         existing_students = cls.load_existing_students()
 
@@ -95,6 +95,26 @@ class Student:
                 writer.writerow(selected_student)
                 print(TextColors.RED + "\n You are opted out!" + TextColors.RESET)
 
+
+    def display_previous_fee_information(self, student):
+        print("\n Previous Fee Information:")
+        
+        fee_paid = student.get('fee_paid', 'N/A')
+        remaining_fee = max(0, int(self.academy.fee) - int(fee_paid))
+        over_payment = max(0, int(fee_paid) - int(self.academy.fee))
+        
+        print(f" - Fee Paid: {fee_paid}")
+        print(f" - Remaining Fee for the next session: {remaining_fee}")
+        print(f" - Overpayment from previous sessions: {over_payment}")
+
+        if remaining_fee > 0:
+            print(f" - Remaining Fee for the next session: {remaining_fee}")
+        elif over_payment > 0:
+            print(f" - Overpayment from previous sessions: {over_payment}")
+            print("   Please contact the office for a refund or carry forward for the next session.")
+        else:
+            print(" - Your fees are up to date. No remaining fee or overpayment.")
+
     def check_enrollment_status(self):
         with open('student.csv', 'r') as file:
             reader = csv.DictReader(file)
@@ -108,21 +128,16 @@ class Student:
                         print(TextColors.RED + "\n Student has already fully paid and cannot enroll again." + TextColors.RESET)
                         return True
 
-                    print(TextColors.RED + "\n Student already enrolled! \n Rejoining the Course  again .....  " + TextColors.RESET)
-                    
+                    print(TextColors.RED + "\n Student already enrolled! " + TextColors.RESET)
 
-                    # Display previous fee information
-                    # print(f"\n Previous Fee Information:")
-                    # print(f" - Fee Paid: {student['fee_paid']}")
-                    # remaining_fee = max(0, int(self.academy.fee) - int(student["fee_paid"]))
-                    # over_payment = max(0, int(student["fee_paid"]) - int(self.academy.fee))
-                   
-                    return False
+                    # Display previous fee information using the new method
+                    self.display_previous_fee_information(student)
+
+                    return True
 
             # If the loop completes without finding the student, it's a new enrollment
             print(TextColors.GREEN + "\n New student enrolled! " + TextColors.RESET)
-            return True
-
+            return False
     def pay_fee(self, fee):
         updated_row = None
         with open("student.csv", 'r') as file:

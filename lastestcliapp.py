@@ -32,13 +32,24 @@ class Student:
             # sniffwr =
             writer.writerow(student_data.keys())    
             writer.writerow(student_data.values())
+
+
     @classmethod
     def update_student_data(cls, student_data):
-        existing_students = cls.load_existing_students()
+        # Load all existing students' data as a list of dictionaries
+        existing_students = []
+        with open('student.csv', 'r') as file:
+            reader = csv.DictReader(file)
+            existing_students = list(reader)
 
+        # Update the existing student's data or add a new record
         student_found = False
         for existing_student in existing_students:
-            if cls.student_match(existing_student, student_data):
+            if (
+                existing_student['first_name'] == student_data['first_name']
+                and existing_student['last_name'] == student_data['last_name']
+                and existing_student['academy'] == student_data['academy']
+            ):
                 existing_student.update({
                     'fee_paid': student_data['fee_paid'],
                     'is_dropout': student_data['is_dropout'],
@@ -50,13 +61,23 @@ class Student:
         if not student_found:
             existing_students.append(student_data)
 
-        cls.write_student_data(existing_students)
+        # Write the updated data back to the CSV file
+        with open('student.csv', 'w', newline='') as csvfile:
+            fieldnames = ["id", "first_name", "last_name", "academy", "fee_paid", "is_dropout",
+                          "first_session_clear", "second_session_clear"]
+
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            writer.writeheader()
+
+            # Write the row of student data
+            writer.writerows(existing_students)
 
         if student_found:
             print(TextColors.GREEN + "\nStudent data updated successfully!" + TextColors.RESET)
         else:
             print(TextColors.GREEN + "\nNew student enrolled successfully!" + TextColors.RESET)
-  
+
+
     @classmethod
     def find_student(cls, first_name, last_name, academy):
         with open('student.csv', 'r') as file:
@@ -108,20 +129,28 @@ class Student:
                         print(TextColors.RED + "\n Student has already fully paid and cannot enroll again." + TextColors.RESET)
                         return True
 
-                    print(TextColors.RED + "\n Student already enrolled! \n Rejoining the Course  again .....  " + TextColors.RESET)
+                    print(TextColors.RED + "\n Student already enrolled! " + TextColors.RESET)
                     
 
                     # Display previous fee information
-                    # print(f"\n Previous Fee Information:")
-                    # print(f" - Fee Paid: {student['fee_paid']}")
-                    # remaining_fee = max(0, int(self.academy.fee) - int(student["fee_paid"]))
-                    # over_payment = max(0, int(student["fee_paid"]) - int(self.academy.fee))
-                   
-                    return False
+                    print(f"\n Previous Fee Information:")
+                    print(f" - Fee Paid: {student['fee_paid']}")
+                    remaining_fee = max(0, int(self.academy.fee) - int(student["fee_paid"]))
+                    over_payment = max(0, int(student["fee_paid"]) - int(self.academy.fee))
+
+                    if remaining_fee > 0:
+                        print(f" - Remaining Fee for the next session: {remaining_fee}")
+                    elif over_payment > 0:
+                        print(f" - Overpayment from previous sessions: {over_payment}")
+                        print("   Please contact the office for a refund or carry forward for the next session.")
+                    else:
+                        print(" - Your fees are up to date. No remaining fee or overpayment.")
+
+                    return True
 
             # If the loop completes without finding the student, it's a new enrollment
             print(TextColors.GREEN + "\n New student enrolled! " + TextColors.RESET)
-            return True
+            return False
 
     def pay_fee(self, fee):
         updated_row = None
@@ -169,49 +198,19 @@ class Academy:
         self.name = name
         self.fee = academy_fee
         self.course = course
+
     def start_session(self, student, is_next=False):
         print("\n Starting new session ")
         print(TextColors.YELLOW + f" \n Academy Name: {self.name}" + TextColors.RESET)
         print(TextColors.YELLOW + f"\n Course Name: {self.course}" + TextColors.RESET)
-        additional_fee = 0  # Initialize additional_fee before the loop
+
         if is_next:
             feepaid = 0
             with open('student.csv', 'r', newline="") as file:
                 reader = csv.reader(file)
                 for row in reader:
                     if row[1] == student.firstname and row[2] == student.lastname and row[3] == self.id:
-                        feepaid = int(row[4])
-
-            remaining_fee = max(0, int(self.fee) - feepaid)
-
-            while remaining_fee > 0:
-                print(TextColors.YELLOW + f"\n Remaining Fee for the next session: {remaining_fee}" + TextColors.RESET)
-
-                # Ask the user to pay the remaining fee
-                additional_fee = int(input(TextColors.BLUE + "\n Enter the amount to pay the remaining fee: " + TextColors.RESET))
-
-                if additional_fee > remaining_fee:
-                    print(TextColors.RED + "You entered more than the remaining fee. Please try again." + TextColors.RESET)
-                elif additional_fee < remaining_fee:
-                    print(TextColors.RED + "You entered less than the remaining fee. Please try again." + TextColors.RESET)
-                else:
-                    # Update the student's fee paid
-                    student.pay_fee(feepaid + additional_fee)
-                    print(TextColors.GREEN + "\n Remaining fee paid. You can now start the next session." + TextColors.RESET)
-
-                # Recalculate remaining fee after user's input
-                remaining_fee = max(0, int(self.fee) - (feepaid + additional_fee))
-
-            else:
-                print(TextColors.GREEN + "\n No remaining fee. Your fees are up to date." + TextColors.RESET)
-
-            # Check for overpayment
-            overpayment = max(0, feepaid + additional_fee - int(self.fee))
-            if overpayment > 0:
-                print(TextColors.YELLOW + f"\n You have overpaid by {overpayment}. Please collect your overpaid amount." + TextColors.RESET)
-
-
-
+                        feepaid = row[4]
 
 if __name__ == "__main__":
     name = input(TextColors.GREEN + " \n  Enter your Name: " + TextColors.RESET)

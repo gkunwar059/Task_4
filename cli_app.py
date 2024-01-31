@@ -24,8 +24,60 @@ class Student:
         "is_dropout":False
         }
 
-# initialized student_data write into a csv file 
-# student.csv: Used to store data related to students. The columns include id, student_name, academy, fee_paid, and is_dropout.
+
+    @classmethod
+    def update_student_data(cls, student_data):
+        existing_student = cls.find_student(student_data['first_name'], student_data['last_name'], student_data['academy'])
+        
+        if existing_student:
+            # Update the existing student's data
+            existing_student.update({
+                'fee_paid': student_data['fee_paid'],
+                'is_dropout': student_data['is_dropout'],
+                'first_session_clear': student_data['first_session_clear'],
+                'second_session_clear': student_data['second_session_clear']
+            })
+
+            # Write the updated data back to the CSV file
+            with open('student.csv', 'w', newline='') as csvfile:
+                fieldnames = ["id", "first_name", "last_name", "academy", "fee_paid", "is_dropout", "first_session_clear", "second_session_clear"]
+                writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+
+                writer.writeheader()
+                writer.writerow(existing_student)
+                print(TextColors.GREEN + "\nStudent data updated successfully!" + TextColors.RESET)
+        else:
+            # If the student doesn't exist, add a new record
+            with open('student.csv', 'a', newline='') as csvfile:
+                fieldnames = ["id", "first_name", "last_name", "academy", "fee_paid", "is_dropout", "first_session_clear", "second_session_clear"]
+                writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+
+                if csvfile.tell() == 0:
+                    writer.writeheader()
+
+                writer.writerow(student_data)
+                print(TextColors.GREEN + "\nNew student enrolled successfully!" + TextColors.RESET)
+
+    @classmethod
+    def find_student(cls, first_name, last_name, academy):
+        with open('student.csv', 'r') as file:
+            reader = csv.DictReader(file)
+            for student in reader:
+                if first_name == student["first_name"] and last_name == student["last_name"] and academy == student["academy"]:
+                    return student
+
+
+
+
+
+
+
+
+
+
+
+# # initialized student_data write into a csv file 
+# # student.csv: Used to store data related to students. The columns include id, student_name, academy, fee_paid, and is_dropout.
         with open ("student.csv",'w',newline="") as file:
             writer=csv.writer(file)
             writer.writerow(student_data.keys())
@@ -107,7 +159,6 @@ class Academy:
         self.fee=academy_fee
         self.course=course
 
-
         # method start_session to begain a new session,checking if the student has paid the full fee
     def start_session(self,student,is_next=False):
         print("Starting new session ")
@@ -125,7 +176,7 @@ class Academy:
                     if row[1]==student.student_name and row[2]==self.id:
                         feepaid=row[3]
         
-            if feepaid < self.fee:
+            if feepaid < int(self.fee):
                 print("Please pay remaining installment fee")
 
             elif feepaid>self.fee:
