@@ -48,10 +48,7 @@ class Student:
             return first_line == "id,first_name,last_name,academy,fee_paid,is_dropout,first_session_clear,second_session_clear"
 
     def opt_out(self):
-        selected_student = None
-        with open("student.csv", 'r') as file:
-            reader = csv.reader(file)
-            for row in reader:
+      
                 if self.firstname == row[1] and self.lastname == row[2] and self.academy.id == row[3]:
                     selected_student = {
                         "id": row[0],
@@ -65,16 +62,16 @@ class Student:
                     }
 
         # If found, updates the student's status to dropout and writes it back to the file.
-        with open("student.csv", "a") as file:
-            fieldnames = ["id", "first_name", "last_name", "academy", "fee_paid", "is_dropout",
-                           "first_session_clear", "second_session_clear"]
-            writer = csv.DictWriter(file, fieldnames=fieldnames)
+                with open("student.csv", "a") as file:
+                    fieldnames = ["id", "first_name", "last_name", "academy", "fee_paid", "is_dropout",
+                                    "first_session_clear", "second_session_clear"]
+                    writer = csv.DictWriter(file, fieldnames=fieldnames)
 
-            if selected_student is not None:
-                if file.tell() == 0:
-                    writer.writeheader()
-                writer.writerow(selected_student)
-                print(TextColors.RED + "\n You are opted out!" + TextColors.RESET)
+                    if selected_student is not None:
+                        if file.tell() == 0:
+                            writer.writeheader()
+                        writer.writerow(selected_student)
+                        print(TextColors.RED + "\n You are opted out!" + TextColors.RESET)
 
     def check_enrollment_status(self):
         with open('student.csv', 'r') as file:
@@ -90,16 +87,8 @@ class Student:
                         return True
 
                     print(TextColors.RED + "\n Student already enrolled! \n Please Join the Academy Again ......   " + TextColors.RESET)
-                    # exit()
-                    
-
-                    # Display previous fee information
-                    # print(f"\n Previous Fee Information:")
-                    # print(f" - Fee Paid: {student['fee_paid']}")
-                    # remaining_fee = max(0, int(self.academy.fee) - int(student["fee_paid"]))
-                    # over_payment = max(0, int(student["fee_paid"]) - int(self.academy.fee))
-                   
                     return False
+                   
 
             # If the loop completes without finding the student, it's a new enrollment
             print(TextColors.GREEN + "\n New student enrolled! " + TextColors.RESET)
