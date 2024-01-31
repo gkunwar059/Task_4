@@ -146,3 +146,6 @@ id,first_name,last_name,academy,fee_paid,is_dropout,first_session_clear,second_s
 1,ganesh,kunwar,1,0,False,False,False
 id,first_name,last_name,academy,fee_paid,is_dropout,first_session_clear,second_session_clear
 1,ganesh,kunwar,3,0,False,False,False
+id,first_name,last_name,academy,fee_paid,is_dropout,first_session_clear,second_session_clear
+1,ganesh,kunwar,1,0,False,False,False
+1,ganesh,kunwar,1,1,False,True,True
