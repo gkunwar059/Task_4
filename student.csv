@@ -1,9 +1,3 @@
 id,first_name,last_name,academy,fee_paid,is_dropout,first_session_clear,second_session_clear
-1,ranes,anes,1,0,False,False,False
-1,ranes,anes,1,2345,False,True,True
-1,ranes,anes,1,4000,False,False,False
-1,ram,rasdas,1,0,False,False,False
-1,ram,rasdas,1,34567,False,True,True
-1,ram,ram,1,0,False,False,False
-1,ram,ram,1,2345,False,True,True
-1,ram,ram,1,4000,False,False,False
+1,/bin/python3.11,/home/ganesh/cli_application/cli_application.py,1,0,False,False,False
+1,/bin/python3.11,/home/ganesh/cli_application/cli_application.py,1,4000,False,True,True

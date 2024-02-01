@@ -48,30 +48,48 @@ class Student:
             return first_line == "id,first_name,last_name,academy,fee_paid,is_dropout,first_session_clear,second_session_clear"
 
     def opt_out(self):
-      
-                if self.firstname == row[1] and self.lastname == row[2] and self.academy.id == row[3]:
-                    selected_student = {
-                        "id": row[0],
-                        "first_name": row[1],
-                        "last_name": row[2],
-                        "academy": row[3],
-                        "fee_paid": row[4],
-                        "is_dropout": True,
-                        "first_session_clear": False,
-                        "second_session_clear": False
-                    }
+        # Read existing data from the file
+        rows = []
+        with open("student.csv", 'r') as file:
+            reader = csv.DictReader(file)
+            rows = list(reader)
 
-        # If found, updates the student's status to dropout and writes it back to the file.
-                with open("student.csv", "a") as file:
-                    fieldnames = ["id", "first_name", "last_name", "academy", "fee_paid", "is_dropout",
-                                    "first_session_clear", "second_session_clear"]
-                    writer = csv.DictWriter(file, fieldnames=fieldnames)
+        selected_student = None
 
-                    if selected_student is not None:
-                        if file.tell() == 0:
-                            writer.writeheader()
-                        writer.writerow(selected_student)
-                        print(TextColors.RED + "\n You are opted out!" + TextColors.RESET)
+        # Iterate through the rows to find the matching student
+        for index, row in enumerate(rows):
+            if (
+                self.firstname == row["first_name"]
+                and self.lastname == row["last_name"]
+                and self.academy.id == row["academy"]
+            ):
+                # Create the updated student data
+                selected_student = {
+                    "id": row["id"],
+                    "first_name": row["first_name"],
+                    "last_name": row["last_name"],
+                    "academy": row["academy"],
+                    "fee_paid": row["fee_paid"],
+                    "is_dropout": True,
+                    "first_session_clear": False,
+                    "second_session_clear": False
+                }
+
+                # Update the rows list with the modified data
+                rows[index] = selected_student
+
+        if selected_student is not None:
+            # Write the updated data back to the file
+            with open("student.csv", "w", newline='') as file:
+                fieldnames = ["id", "first_name", "last_name", "academy", "fee_paid", "is_dropout",
+                            "first_session_clear", "second_session_clear"]
+                writer = csv.DictWriter(file, fieldnames=fieldnames)
+                writer.writeheader()
+                writer.writerows(rows)
+
+            print(TextColors.RED + "\n You are opted out!" + TextColors.RESET)
+        else:
+            print(TextColors.RED + "\n Student not found for opt-out." + TextColors.RESET)
 
     def check_enrollment_status(self):
         with open('student.csv', 'r') as file:
@@ -90,9 +108,6 @@ class Student:
                     return False
                    
 
-            # If the loop completes without finding the student, it's a new enrollment
-            print(TextColors.GREEN + "\n New student enrolled! " + TextColors.RESET)
-            return True
 
     def pay_fee(self, fee):
         updated_row = None
@@ -182,9 +197,11 @@ class Academy:
                 print(TextColors.YELLOW + f"\n You have overpaid by {overpayment}. Please collect your overpaid amount." + TextColors.RESET)
 
 
-
+# TODO: 1.enter your name input 2.enter the number to join the academy 3.Enter the amout 4.next session 5. pay remaining fees 
+                
 
 if __name__ == "__main__":
+    
     name = input(TextColors.GREEN + " \n  Enter your Name: " + TextColors.RESET)
     print(TextColors.BLUE + "\n  Please select the academy you want to join !" + TextColors.RESET)
 
@@ -193,9 +210,13 @@ if __name__ == "__main__":
         next(reader)
         for row in reader:
             print(row[0], row[1], row[2], row[3])
-
-        choice = int(input(TextColors.YELLOW + "\n  Enter the number to join the academy  :" + TextColors.RESET))
-        academy = None
+        while True:
+            try:
+                choice = int(input(TextColors.YELLOW + "\n  Enter the number to join the academy  :" + TextColors.RESET))
+                academy = None
+                break
+            except ValueError:
+                print("Please enter the valid number to join !! ")
 
         with open("academy.csv", 'r') as file:
             reader = csv.reader(file)
@@ -209,11 +230,25 @@ if __name__ == "__main__":
 
         print(f"\n Total enrollment Fee: {academy.fee}")
         print("\n How much do you want to pay now?")
-        fee = int(input(TextColors.YELLOW + "\n Enter the amount:" + TextColors.RESET))
+        # implemet the exception handling 
+        while True:
+            try:
+                fee = int(input(TextColors.YELLOW + "\n Enter the amount:" + TextColors.RESET))
+                break
+            # if the input was valid loop is exit 
+            except ValueError:
+                print("please the valid amount ! ")
 
         student.pay_fee(fee)
-        choice = int(input(TextColors.BLUE + "\n  Do you want to start the next session(1) or opt out(2)?"
+        # implemet the exception handling 
+        while True:
+            try:
+                choice = int(input(TextColors.BLUE + "\n  Do you want to start the next session(1) or opt out(2)?"
+                                   
                            + TextColors.RESET))
+                break
+            except ValueError:
+                print("Please choice in number 1 and 2 ")
 
         if choice == 2:
             student.opt_out()
