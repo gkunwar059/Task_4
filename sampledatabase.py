@@ -1,4 +1,4 @@
-import csv
+
 from postgres_handler import postgres_connect
 class DBHandler:
     @classmethod

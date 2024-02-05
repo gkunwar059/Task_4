@@ -99,7 +99,7 @@ class Student:
                 print(f" Course: {self.academy.course}")
                 print(f" Total Enrollment Fee: {self.academy.fee}")
                 print(f" Fee Paid: {student_data['fee_paid']}")
-                print(f" Enrollment Status: {'Enrolled' if not student_data['is_dropout'] else 'Opted Out'}")
+                # print(f" Enrollment Status: {'Enrolled' if not student_data['is_dropout'] else 'Opted Out'}")
                 print(f" First Session Cleared: {student_data['first_session_clear']}")
                 print(f" Second Session Cleared: {student_data['second_session_clear']}")
             else:
@@ -162,57 +162,80 @@ class Academy:
             if overpayment > 0:
                 print(
                     TextColors.YELLOW + f"\n You have overpaid by {overpayment}. Please collect your overpaid amount." + TextColors.RESET)
-
-
+# for input user
+def get_valid_input(prompt, validator, error_message):
+    while True:
+        user_input = input(prompt)
+        if validator(user_input):
+            return user_input
+        else:
+            print(error_message)
 
 if __name__ == "__main__":
-    name = input(TextColors.GREEN + "\t \t \n Enter your Name: " + TextColors.RESET)
-    print(TextColors.BLUE + "\n Please select the academy you want to join!" + TextColors.RESET)
+    print(TextColors.GREEN + "\t \t \n Enter your Name:" + TextColors.RESET)
+    name = input()
 
+    print(TextColors.BLUE + "\n Please select the academy you want to join!" + TextColors.RESET)
     academies = DBHandler.read_academy_data()
+
     for idx, row in enumerate(academies, start=1):
         print(f" {row['id']} {row['name']} {row['fee']} {row['course']}")
-    while True:
-        try:
-            choice = int(input(TextColors.YELLOW + "\n Enter the number to join the academy: " + TextColors.RESET))
-            academy = next(
-                (Academy(row['id'], row['name'], row['fee'], row['course']) for row in academies if int(row['id']) == choice),
-                None)
-            if academy:
-                break
-            print("Invalid choice. Please enter a valid number.")
-        except ValueError:
-            print("Please enter a valid number to join!")
+
+    academy_choice = get_valid_input(
+        TextColors.YELLOW + "\n Enter the number to join the academy:" + TextColors.RESET,
+        lambda x: x.isdigit() and 1 <= int(x) <= len(academies),
+        "Invalid choice. Please enter a valid number."
+    )
+
+    academy = next(
+        (Academy(row['id'], row['name'], row['fee'], row['course']) for row in academies if int(row['id']) == int(academy_choice)),
+        None
+    )
+
+    if not academy:
+        print("Invalid choice. Exiting.")
+        sys.exit()
+
     first_name, last_name = name.split(' ')
     student = Student(first_name, last_name, academy)
+
     print(f"\n Total enrollment Fee: {academy.fee}")
-    print("\n How much do you want to pay now?")
+    fee = get_valid_input(
+        TextColors.YELLOW + "\n Enter the amount:" + TextColors.RESET,
+        lambda x: x.isdigit(),
+        "Please enter a valid amount."
+    )
+
+    student.pay_fee(int(fee))
+
     while True:
         try:
-            fee = int(input(TextColors.YELLOW + "\n Enter the amount: " + TextColors.RESET))
-            break
-        except ValueError:
-            print("Please enter a valid amount!")
+            print(TextColors.BLUE + "\n Choose an action:")
+            print("[1] Start the next session")
+            print("[2] Opt out")
+            print("[3] View details")
+            print("[4] Cancel admission")
+            print("[5] Exit")
+            
+            action_choice = get_valid_input(
+                TextColors.YELLOW + "\n Enter your choice:" + TextColors.RESET,
+                lambda x: x.isdigit() and 1 <= int(x) <= 5,
+                "Invalid choice. Please enter a valid number."
+            )
 
-    student.pay_fee(fee)
-    while True:
-        try:
-            choice = int(
-                input(TextColors.BLUE + "\n Do you want to start the next session(1) , opt out(2) ,Student view detail (3) and Admission Cancel (4) ? and " + TextColors.RESET))
-            break
+            if action_choice == '1':
+                academy.start_session(student, is_next=True)
+            elif action_choice == '2':
+                student.opt_out()
+            elif action_choice == '3':
+                student.view_details()
+            elif action_choice == '4':
+                student.cancel_admission()
+            elif action_choice == '5':
+                print("Exiting.")
+                sys.exit()
         except ValueError:
-            print("Please choose 1 ,2,3,4")
+            print("Please enter a valid number.")
     
     
-    if choice == 3:
-        student.view_details()
-
-    if choice == 2:
-        student.opt_out()
-        
-    elif choice == 1:
-        academy.start_session(student, is_next=True)
-        
-    elif choice == 4:
-        student.cancel_admission()
-
+ 
