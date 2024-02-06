@@ -1,6 +1,8 @@
 
 from postgres_handler import postgres_connect
 class DBHandler:
+    
+    
     @staticmethod
     def update_student(student, data):
         command = '''
@@ -52,33 +54,14 @@ class DBHandler:
         
         '''
         tuple1=(id,)
-        print(id)
         corr,con=postgres_connect()
         corr.execute(command,tuple1)
-        student=corr.fetchone()
+        student=corr.fetchone() 
         corr.close()
         con.close()
         student_dict = dict(zip(["id", "first_name", "last_name", "academy","fee_paid","is_dropout","first_session_clear","second_session_clear"], student))
         return student_dict  
 
-
-    @staticmethod
-    def get_students():
-        command = '''
-        SELECT * FROM student
-        '''
-        corr, conn = postgres_connect()
-        corr.execute(command)
-        students = corr.fetchall()
-        corr.close()
-        conn.close()
-        
-        students_list = []
-        for student_tuple in students:
-            student_dict = dict(zip(["id", "first_name", "last_name", "academy","fee_paid","is_dropout","first_session_clear","second_session_clear"], student_tuple))
-            students_list.append(student_dict)
-
-        return students_list
 
 
     @staticmethod
@@ -108,34 +91,6 @@ class DBHandler:
         conn.close()
 
         return new_id
-
-
-    @staticmethod
-    def has_csv_header():
-        required_columns = [
-            "id",
-            "first_name",
-            "last_name",
-            "academy",
-            "fee_paid",
-            "is_dropout",
-            "first_session_clear",
-            "second_session_clear"
-        ]
-
-        query = f'''
-            SELECT column_name
-            FROM information_schema.columns
-            WHERE table_name = 'student';
-        '''
-
-        corr, conn = postgres_connect()
-        corr.execute(query)
-        columns = [column[0] for column in corr.fetchall()]
-        corr.close()
-        conn.close()
-
-        return set(required_columns).issubset(set(columns))
 
 
     @staticmethod

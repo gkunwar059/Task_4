@@ -1,3 +1,4 @@
+
 class TextColors:
     GREEN = '\033[92m'
     RED = '\033[91m'
@@ -57,10 +58,7 @@ class Student:
             fee_paid_from_db = DBHandler.get_fee_paid(student)
             fee_paid_from_db = int(fee_paid_from_db)
             total_paid_fee = fee + fee_paid_from_db
-            # remaining_fee = DBHandler.update_fee_paid(student, fee)
-            remaining_fee=max(0,self.academy.fee-total_paid_fee)
-            
-            # over_payment = max(0, total_paid_fee - int(self.academy.fee))
+            remaining_fee=max(0,self.academy.fee-total_paid_fee)  
             first_session_clear = True if student.get("first_session_clear") == "False" else student.get(
                 "first_session_clear")
             second_session_clear = True if student.get(
@@ -76,7 +74,6 @@ class Student:
             }):
                 print("Could not pay your fee ...")
 
-            # if total_paid_fee < int(self.academy.fee):
             if remaining_fee > 0:
                 print(f"\nYou need to pay the remaining installment of {remaining_fee}")
                 
@@ -102,8 +99,6 @@ class Student:
                 print(f" Total Enrollment Fee: {self.academy.fee}")
                 print(f" Fee Paid: {student_data['fee_paid']}")
                 print(f" Enrollment Status: {'Enrolled' if not student_data['is_dropout'] else 'Opted Out'}")
-                print(f" First Session Cleared: {student_data['first_session_clear']}")
-                print(f" Second Session Cleared: {student_data['second_session_clear']}")
             else:
                 print("No student found.")    
   
@@ -126,7 +121,7 @@ class Student:
                     if student_data['is_dropout']:
                         print("Already Drop Out")
                     else:
-                        print(TextColors.RED + "\n Admission canceled. 50% refund processed." + TextColors.RESET)
+                        print(TextColors.RED + f"\n Admission canceled.50% refund processed {refund_amount}" + TextColors.RESET)
                 else:
                     print(TextColors.RED + "\n Failed to cancel admission." + TextColors.RESET)
             else:
@@ -170,18 +165,15 @@ class Academy:
                 print(
   
                     TextColors.YELLOW + f"\n You have overpaid by {overpayment}. Please collect your overpaid amount." + TextColors.RESET)
-# for input user
-def get_valid_input(prompt, validator, error_message):
-    while True:
-        user_input = input(prompt)
-        if validator(user_input):
-            return user_input
-        else:
-            print(error_message)
+
+
+
 
 if __name__ == "__main__":
+    
     print(TextColors.GREEN + "\t \t \n Enter your Name:" + TextColors.RESET)
     name = input()
+    
 
     print(TextColors.BLUE + "\n Please select the academy you want to join!" + TextColors.RESET)
     academies = DBHandler.read_academy_data()
@@ -189,16 +181,10 @@ if __name__ == "__main__":
     for idx, row in enumerate(academies, start=1):
         print(f" {row['id']} {row['name']} {row['fee']} {row['course']}")
 
-    academy_choice = get_valid_input(
-        TextColors.YELLOW + "\n Enter the number to join the academy:" + TextColors.RESET,
-        lambda x: x.isdigit() and 1 <= int(x) <= len(academies),
-        "Invalid choice. Please enter a valid number."
-    )
+    academy_choice = input(TextColors.YELLOW + "\n Enter the number to join the academy:" + TextColors.RESET,)
+  
 
-    academy = next(
-        (Academy(row['id'], row['name'], row['fee'], row['course']) for row in academies if int(row['id']) == int(academy_choice)),
-        None
-    )
+    academy = next((Academy(row['id'], row['name'], row['fee'], row['course']) for row in academies if int(row['id']) == int(academy_choice)),None)
 
     if not academy:
         print("Invalid choice. Exiting.")
@@ -208,11 +194,7 @@ if __name__ == "__main__":
     student = Student(first_name, last_name, academy)
 
     print(f"\n Total enrollment Fee: {academy.fee}")
-    fee = get_valid_input(
-        TextColors.YELLOW + "\n Enter the amount:" + TextColors.RESET,
-        lambda x: x.isdigit(),
-        "Please enter a valid amount."
-    )
+    fee = input(TextColors.YELLOW + "\n Enter the amount:" + TextColors.RESET,)
 
     student.pay_fee(int(fee))
 
@@ -225,12 +207,8 @@ if __name__ == "__main__":
             print("[4] Cancel admission")
             print("[5] Exit")
             
-            action_choice = get_valid_input(
-                TextColors.YELLOW + "\n Enter your choice:" + TextColors.RESET,
-                lambda x: x.isdigit() and 1 <= int(x) <= 5,
-                "Invalid choice. Please enter a valid number."
-            )
-
+            action_choice = input(TextColors.YELLOW + "\n Enter your choice:" + TextColors.RESET, )
+            
             if action_choice == '1':
                 academy.start_session(student, is_next=True)
             elif action_choice == '2':
@@ -246,4 +224,3 @@ if __name__ == "__main__":
             print("Please enter a valid number.")
     
     
- 
