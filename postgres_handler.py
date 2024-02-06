@@ -6,8 +6,7 @@ def postgres_connect():
         user="postgres",
         password="123456789"
     )
-   
-   
+     
     corr=conn.cursor()
             
     return corr,conn

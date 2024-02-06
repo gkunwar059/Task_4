@@ -1,8 +1,8 @@
 
 from postgres_handler import postgres_connect
 class DBHandler:
-    @classmethod
-    def update_student(cls,student, data):
+    @staticmethod
+    def update_student(student, data):
         command = '''
             UPDATE student SET
                 first_name = %s,
@@ -81,8 +81,8 @@ class DBHandler:
         return students_list
 
 
-    @classmethod
-    def add_student(cls, data):
+    @staticmethod
+    def add_student(data):
         command = '''
             INSERT INTO student (first_name, last_name, academy, fee_paid, is_dropout, first_session_clear, second_session_clear)
             VALUES (%s, %s, %s, %s, %s, %s, %s)
@@ -110,8 +110,8 @@ class DBHandler:
         return new_id
 
 
-    @classmethod
-    def has_csv_header(cls):
+    @staticmethod
+    def has_csv_header():
         required_columns = [
             "id",
             "first_name",
@@ -168,7 +168,6 @@ class DBHandler:
                 second_session_clear = %s
             WHERE id = %s
         '''
-        print(student)
         tuple1 = (total_payed_fee,
                   True if student["first_session_clear"] == "False" else student["first_session_clear"],
                   True if student["second_session_clear"] == "False" and student["first_session_clear"] == 'True' else False,

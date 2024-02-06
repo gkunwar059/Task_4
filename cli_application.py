@@ -19,7 +19,6 @@ class Student:
         self.lastname = last_name
         self.academy = academy
         already_enrolled = DBHandler.check_enrollment_status(self.firstname, self.lastname, self.academy.id)
-        print(already_enrolled)
         if already_enrolled:
             choice = int(input("Student already enrolled. Do you want to join again? [1] Yes [2] No"))
             if choice == 2:
@@ -53,14 +52,15 @@ class Student:
     
     
     def pay_fee(self, fee):
-        students = DBHandler.get_students()
-        if students:
-            student = students[0]
+        student = DBHandler.get_student(self.id)
+        if student:
             fee_paid_from_db = DBHandler.get_fee_paid(student)
             fee_paid_from_db = int(fee_paid_from_db)
             total_paid_fee = fee + fee_paid_from_db
-            remaining_fee = DBHandler.update_fee_paid(student, fee)
-            over_payment = max(0, total_paid_fee - int(self.academy.fee))
+            # remaining_fee = DBHandler.update_fee_paid(student, fee)
+            remaining_fee=max(0,self.academy.fee-total_paid_fee)
+            
+            # over_payment = max(0, total_paid_fee - int(self.academy.fee))
             first_session_clear = True if student.get("first_session_clear") == "False" else student.get(
                 "first_session_clear")
             second_session_clear = True if student.get(
@@ -76,8 +76,10 @@ class Student:
             }):
                 print("Could not pay your fee ...")
 
-            if total_paid_fee < int(self.academy.fee):
+            # if total_paid_fee < int(self.academy.fee):
+            if remaining_fee > 0:
                 print(f"\nYou need to pay the remaining installment of {remaining_fee}")
+                
             elif total_paid_fee == int(self.academy.fee):
                 print("\nTotal Fee Paid")
             else:
@@ -99,7 +101,7 @@ class Student:
                 print(f" Course: {self.academy.course}")
                 print(f" Total Enrollment Fee: {self.academy.fee}")
                 print(f" Fee Paid: {student_data['fee_paid']}")
-                # print(f" Enrollment Status: {'Enrolled' if not student_data['is_dropout'] else 'Opted Out'}")
+                print(f" Enrollment Status: {'Enrolled' if not student_data['is_dropout'] else 'Opted Out'}")
                 print(f" First Session Cleared: {student_data['first_session_clear']}")
                 print(f" Second Session Cleared: {student_data['second_session_clear']}")
             else:
@@ -110,18 +112,21 @@ class Student:
             if student_data:
                 total_paid_fee = float( student_data['fee_paid'])
                 refund_amount = total_paid_fee * 0.5  # 50% refund
-                remaining_fee = int(total_paid_fee - refund_amount)
+                remaining_db_fee = int(total_paid_fee - refund_amount)
 
                 if DBHandler.update_student(self, {
                     "first_name": self.firstname,
                     "last_name": self.lastname,
                     "academy": self.academy.id,
-                    "fee_paid": remaining_fee,
+                    "fee_paid": remaining_db_fee,
                     "is_dropout": True,
                     "first_session_clear": False,
                     "second_session_clear": False
                 }):
-                    print(TextColors.RED + "\n Admission canceled. 50% refund processed." + TextColors.RESET)
+                    if student_data['is_dropout']:
+                        print("Already Drop Out")
+                    else:
+                        print(TextColors.RED + "\n Admission canceled. 50% refund processed." + TextColors.RESET)
                 else:
                     print(TextColors.RED + "\n Failed to cancel admission." + TextColors.RESET)
             else:
@@ -153,14 +158,17 @@ class Academy:
                         TextColors.RED + "You entered less than the remaining fee. Please try again." + TextColors.RESET)
                 else:
                     student.pay_fee(additional_fee)
+                    remaining_fee-=additional_fee
+                    print("remainddadadas",remaining_fee)
                     print(
                         TextColors.GREEN + "\n Remaining fee paid. You can now start the next session." + TextColors.RESET)
             else:
                 print(TextColors.GREEN + "\n No remaining fee. Your fees are up to date." + TextColors.RESET)
 
-            overpayment = max(0, DBHandler.get_fee_paid(student) - additional_fee - int(self.fee))
+            overpayment = max(0, DBHandler.get_fee_paid(student) - int(self.fee))
             if overpayment > 0:
                 print(
+  
                     TextColors.YELLOW + f"\n You have overpaid by {overpayment}. Please collect your overpaid amount." + TextColors.RESET)
 # for input user
 def get_valid_input(prompt, validator, error_message):
